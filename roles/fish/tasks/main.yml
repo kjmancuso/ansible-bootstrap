@@ -1,0 +1,12 @@
+---
+- name: Add Fish Shell PPA
+  apt_repository:
+    repo: ppa:fish-shell/release-3
+
+- name: Install fish
+  apt: pkg=fish state=latest
+
+- name: Change default shell
+  user:
+    name: "{{ user }}"
+    shell: /usr/bin/fish

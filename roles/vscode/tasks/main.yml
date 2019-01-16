@@ -1,0 +1,41 @@
+---
+- name: Add Microsoft apt key
+  apt_key:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+
+- name: Add vscode repo
+  apt_repository:
+    repo: deb https://packages.microsoft.com/repos/vscode stable main
+    filename: vscode
+
+- name: Install vscode
+  apt: pkg=code state=latest
+
+- name: Check for vscode sync extension
+  become: yes
+  become_user: '{{ user }}'
+  command: code --list-extensions
+  register: sync_extension
+  changed_when: "'Shan.code-settings-sync' not in sync_extension.stdout"
+  notify: "install sync extension"
+
+- name: Update vscode settings sync config json
+  become: yes
+  become_user: '{{ user }}'
+  json_module:
+    path: ~/.config/Code/User/syncLocalSettings.json
+    changes:
+      - type: "set"
+        path: "token"
+        value: "{{vscode_sync_token}}"
+
+- name: Update vscode settings sync gist
+  become: yes
+  become_user: '{{ user }}'
+  json_module:
+    path: ~/.config/Code/User/settings.json
+    changes:
+      - type: "set"
+        path: "sync.gist"
+        value: "{{vscode_sync_gist}}"

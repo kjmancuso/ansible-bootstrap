@@ -1,0 +1,6 @@
+---
+- name: Install vscode sync extension
+  become: yes
+  become_user: '{{ user }}'
+  command: code --install-extension Shan.code-settings-sync
+  listen: "install sync extension"

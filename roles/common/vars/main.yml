@@ -1,0 +1,12 @@
+---
+packages: 
+  - 'vim'
+  - 'tmux'
+  - 'mosh'
+  - 'pepperflashplugin-nonfree'
+  - 'ubuntu-restricted-extras'
+  - 'pavucontrol'
+  - 'git'
+  - 'curl'
+  - 'jq'
+  - 'direnv'

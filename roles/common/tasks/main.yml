@@ -1,0 +1,41 @@
+---
+- name: Upgrade packages
+  apt: upgrade=dist update_cache=yes dpkg_options='force-confold,force-confdef'
+  register: apt_upgrade
+  notify:
+    - restart server
+  changed_when: "'linux-image' in apt_upgrade.msg"
+
+- name: Local packages defined, combine lists
+  set_fact:
+    packages: "{{ packages }} + {{ local_pkgs }}"
+  when: local_pkgs is defined
+
+- name: Install packages
+  apt: pkg={{ item }} state=latest
+  with_flattened:
+    - "{{ packages }}"
+
+- name: Configure git email
+  become: yes
+  become_user: '{{ user }}'
+  git_config:
+    scope: global
+    name: user.email
+    value: '{{user_email}}'
+
+- name: Configure git user name
+  become: yes
+  become_user: '{{ user }}'
+  git_config:
+    scope: global
+    name: user.name
+    value: '{{user_fullname}}'
+
+- name: Configure ssh config for github
+  become: yes
+  become_user: '{{ user }}'
+  blockinfile:
+    path: ~/.ssh/config
+    create: yes
+    block: "{{ lookup('file', './local/github_ssh_config') }}"

@@ -1,0 +1,38 @@
+---
+- name: Get i3 repo key
+  apt:
+      deb: http://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2018.01.30_all.deb
+
+- name: Add i3 repo
+  apt_repository: 
+    repo: deb http://debian.sur5r.net/i3/ {{ ansible_distribution_release }} universe
+    filename: sur5r-i3
+
+- name: Install i3
+  apt: pkg=i3 state=latest
+
+- name: Update default window manager
+  alternatives:
+          name: x-session-manager
+          path: /usr/bin/i3
+          priority: 60
+
+- name: Change window manager in GDM
+  replace:
+          path: "/var/lib/AccountsService/users/{{ user }}"
+          regexp: '^XSession=$'
+          replace: 'XSession=i3'
+
+- name: Add Dave's FPM key
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: D401AB61
+
+- name: Add Dave's FPM repo
+  apt_repository:
+    repo: deb https://dl.bintray.com/davewongillies/fpm-recipes {{ ansible_distribution_release }} main
+    filename: davewongillies-fpm
+
+- name: Install polybar
+  apt: pkg=polybar state=latest
+

@@ -1,0 +1,16 @@
+---
+
+- name: Bootstrap an Lenovo X1 Carbon G6
+  hosts: 127.0.0.1
+  connection: local
+  become: yes
+  # Packages very specific to this machine
+  vars:
+    local_pkgs:
+      - 'xserver-xorg-input-synaptics'
+  roles:
+    - common
+    - fish
+    - i3
+    - vscode
+  
