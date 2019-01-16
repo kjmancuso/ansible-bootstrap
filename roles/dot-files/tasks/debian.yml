@@ -1,19 +1,5 @@
 ---
 # Hopefully chezmoi gets in a repo/ppa soon
-- name: Get package facts
-  package_facts:
-    manager: apt
-
-- name: Get chezmoi installed version
-  set_fact:
-    chezmoi_installed_ver: "{{ ansible_facts.packages.chezmoi[0].version }}"
-  when: ansible_facts.packages.chezmoi is defined
-
-- name: Set chezmoi installed version to 0 due to not being installed
-  set_fact:
-    chezmoi_installed_ver: 0
-  when: ansible_facts.packages.chezmoi is not defined
-
 - name: Get latest chezmoi release
   uri:
     url: https://api.github.com/repos/twpayne/chezmoi/releases/latest
@@ -22,16 +8,10 @@
   changed_when: False
   register: chezmoi_release
 
-- name: Extract current release version
-  set_fact:
-    chezmoi_release_version: "{{ chezmoi_release.json | json_query('tag_name') | regex_replace('v') }}"
-
 - name: Extract current release download url
   set_fact:
     chezmoi_download_url: "{{ chezmoi_release.json | json_query('assets[].browser_download_url') | select('search', '_linux_amd64.deb') | first }}"
-  when: chezmoi_installed_ver is version(chezmoi_release, "<")
 
 - name: Install or update chezmoi package
   apt:
     deb: "{{ chezmoi_download_url }}"
-  when: chezmoi_installed_ver is version(chezmoi_release, "<")
