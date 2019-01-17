@@ -10,3 +10,53 @@
   user:
     name: "{{ user }}"
     shell: /usr/bin/fish
+
+- 
+- name: Install OMF
+  become: yes
+  become_user: '{{ user }}'
+  script: files/omf_install.fish --noninteractive
+  args:
+    executable: /usr/bin/fish
+    creates: "{{ lookup('env', 'HOME') }}/.local/share/omf/"
+
+- name: Install OMF plugins
+  become: yes
+  become_user: '{{ user }}'
+  shell: omf install {{ item }}
+  args:
+    creates: "{{ lookup('env', 'HOME') }}/.local/share/omf/pkg/{{ item }}/"
+    executable: /usr/bin/fish
+  with_items:
+    - "{{ fish_plugins }}"
+    
+- name: Install OMF themes
+  become: yes
+  become_user: '{{ user }}'
+  shell: omf install {{ item }}
+  args:
+    creates: "{{ lookup('env', 'HOME') }}/.local/share/omf/themes/{{ item }}/"
+    executable: /usr/bin/fish
+  with_items:
+    - "{{ fish_themes }}"
+
+- name: Create local font directory
+  become: yes
+  become_user: '{{ user }}'
+  file:
+    path: "{{ lookup('env', 'HOME') }}/.local/share/fonts/"
+    state: directory
+
+- name: Install nerdfont for ligature support
+  become: yes
+  become_user: '{{ user }}'
+  get_url:
+    url: https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FantasqueSansMono/Regular/complete/Fantasque%20Sans%20Mono%20Regular%20Nerd%20Font%20Complete.ttf
+    dest: "{{ lookup('env', 'HOME') }}/.local/share/fonts/"
+  register: font_downloaded
+
+- name: Rebuild font cache
+  become: yes
+  become_user: '{{ user }}'
+  shell: /usr/bin/fc-cache -f -v
+  when: font_downloaded is changed
