@@ -10,3 +10,7 @@ packages:
   - 'curl'
   - 'jq'
   - 'direnv'
+  - 'terminator'
+  - 'lastpass-cli'
+  - 'virtualenv'
+  - 'python3-pip'
